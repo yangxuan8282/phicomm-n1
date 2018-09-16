@@ -1,3 +1,3 @@
 # PHICOMM N1 ( linux )
 
-random stuff about PHICOMM N1
+check here: https://github.com/yangxuan8282/phicomm-n1/wiki
