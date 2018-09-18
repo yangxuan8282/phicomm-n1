@@ -1,0 +1,224 @@
+# Maintainer: He Yangxuan <yangxuan8282@gmail.com>
+
+pkgname=linux-s905d
+pkgver=4.18.0
+case $pkgver in
+*.*.*)	_kernver=${pkgver%.*};;
+*.*)	_kernver=${pkgver};;
+esac
+pkgrel=0
+pkgdesc="Linux kernel for Amlogic s905d"
+url=https://github.com/150balbes/Amlogic_s905-kernel
+_commit=846b7fef181189f73ada11fd9ecb69691ed05fd3
+depends="mkinitfs"
+_depends_dev="perl gmp-dev elfutils-dev bash"
+makedepends="$_depends_dev sed installkernel bc linux-headers linux-firmware openssl1.0-dev bison flex"
+options="!strip !check"
+source="$url/archive/${_commit}.tar.gz
+	config-changes-s905d.aarch64
+	"
+subpackages=""
+arch="aarch64"
+license="GPL-2.0"
+_flavors=
+for _i in $source; do
+	case $_i in
+	config-*.$CARCH)
+		_f=${_i%.$CARCH}
+		_f=${_f#config-changes-}
+		_flavors="$_flavors ${_f}"
+		[ "linux-$_f" != "$pkgname" ] && subpackages="$subpackages linux-${_f}::$CBUILD_ARCH"
+		subpackages="$subpackages linux-${_f}-dev:_dev:$CBUILD_ARCH"
+		;;
+	esac
+done
+
+case "$CARCH" in
+	aarch64) _carch="arm64" ;;
+esac
+
+HOSTCC="${CC:-gcc}"
+HOSTCC="${HOSTCC#${CROSS_COMPILE}}"
+
+prepare() {
+	cd "$srcdir"/Amlogic_s905-kernel-$_commit
+
+	# remove localversion from patch if any
+	rm -f localversion*
+
+	local flavor=
+	for flavor in $_flavors; do
+		local builddir="$srcdir"/build-$flavor
+		mkdir -p "$builddir"
+		echo "-$pkgrel-$flavor" > "$builddir"/localversion-alpine
+		_genconfig $flavor
+		make -C "$srcdir"/Amlogic_s905-kernel-$_commit \
+			O="$builddir" \
+			ARCH="$_carch" \
+			HOSTCC="$HOSTCC" \
+			olddefconfig
+		_verifyconfig $flavor
+	done
+}
+
+# generate config from defconfig and apply local changes.
+# config-changes-$flavor.$CARCH holds a list of = delimited
+# config command and values used by kernel scripts/config script.
+_genconfig() {
+	local flavor=$1 defconfig=
+	local builddir="$srcdir"/build-$flavor
+	local defconfig=
+	case $flavor in
+		s905d) defconfig=config_20180719 ;;
+		*) die "Unknown flavor: $flavor" ;;
+	esac
+
+	cp "$srcdir"/Amlogic_s905-kernel-$_commit/$defconfig \
+		"$builddir"/.config
+
+	while read line; do
+		[ ${line:0:1} = "#" ] && continue
+		local option=${line%%=*} str=
+		local cmd=$(echo $line | cut -d= -f2)
+		case "$cmd" in
+			enable|disable|module) str= ;;
+			set-str|set-val) str=${line##*=} ;;
+			*) die "Command $cmd not accepted" ;;
+		esac
+		msg "[$flavor] $cmd: $option $str"
+		"$srcdir"/Amlogic_s905-kernel-$_commit/scripts/config \
+			--file "$builddir"/.config \
+			--${cmd} "$option" "${str//\"/}"
+	done < "$srcdir"/config-changes-$flavor.${CARCH}
+}
+
+# verify if options are set to correct value
+_verifyconfig() {
+	local flavor=$1
+	local builddir="$srcdir"/build-$flavor
+	while read line; do
+		[ ${line:0:1} = "#" ] && continue
+		local option=${line%%=*} str= invert=
+		local cmd=$(echo $line | cut -d= -f2)
+		case "$cmd" in
+			enable) str="$option=y" ;;
+			disable) str="$option"; invert="-v" ;;
+			module) str="$option=m" ;;
+			set-val) str="$option=${line##*=}" ;;
+			set-str) str=${line##*=}
+				str="$option=\"${str//\"/}\"" ;;
+		esac
+		grep -q $invert "^$str" "$builddir"/.config || \
+			die "Config: $option not properly set!"
+	done < "$srcdir"/config-changes-$flavor.${CARCH}
+}
+
+build() {
+	unset LDFLAGS
+	for i in $_flavors; do
+		cd "$srcdir"/build-$i
+		make ARCH="$_carch" CC="${CC:-gcc}" \
+			KBUILD_BUILD_VERSION="$((pkgrel + 1 ))-Alpine"
+	done
+}
+
+_package() {
+	local _buildflavor="$1" _outdir="$2"
+	local _abi_release=${pkgver}-${pkgrel}-${_buildflavor}
+
+	cd "$srcdir"/build-$_buildflavor
+
+	mkdir -p "$_outdir"/boot "$_outdir"/lib/modules
+
+	local _install
+	case "$CARCH" in
+	arm*)
+		_install="zinstall dtbs_install"
+		;;
+	aarch64)
+		_install="install dtbs_install"
+		;;
+	*)
+		_install=install
+		;;
+	esac
+
+	cd "$srcdir"/build-$_buildflavor
+	#local INSTALL_DTBS_PATH="$_outdir"/boot/dtbs
+	local INSTALL_DTBS_PATH="$_outdir"/usr/lib/linux-${_abi_release}
+	make -j1 modules_install $_install \
+		ARCH="$_carch" \
+		INSTALL_MOD_PATH="$_outdir" \
+		INSTALL_PATH="$_outdir"/boot \
+		INSTALL_DTBS_PATH="$INSTALL_DTBS_PATH"
+
+	rm -f "$_outdir"/lib/modules/${_abi_release}/build \
+		"$_outdir"/lib/modules/${_abi_release}/source
+	rm -rf "$_outdir"/lib/firmware
+
+	install -D include/config/kernel.release \
+		"$_outdir"/usr/share/kernel/$_buildflavor/kernel.release
+
+	if [ "$CARCH" = "aarch64" ]; then
+		mv -f "$INSTALL_DTBS_PATH"/amlogic/*.dtb \
+			"$INSTALL_DTBS_PATH"
+		rmdir "$INSTALL_DTBS_PATH"/amlogic
+	fi
+}
+
+# main flavor installs in $pkgdir
+package() {
+	depends="$depends linux-firmware-brcm"
+	_package s905d "$pkgdir"
+}
+
+_dev() {
+	local _flavor=$(echo $subpkgname | sed -E 's/(^linux-|-dev$)//g')
+	local _abi_release=${pkgver}-${pkgrel}-$_flavor
+	# copy the only the parts that we really need for build 3rd party
+	# kernel modules and install those as /usr/src/linux-headers,
+	# simlar to what ubuntu does
+	#
+	# this way you dont need to install the 300-400 kernel sources to
+	# build a tiny kernel module
+	#
+	pkgdesc="Headers and script for third party modules for $_flavor kernel"
+	depends="$_depends_dev"
+	local dir="$subpkgdir"/usr/src/linux-headers-${_abi_release}
+
+	# first we import config, run prepare to set up for building
+	# external modules, and create the scripts
+	mkdir -p "$dir"
+	cp "$srcdir"/build-$_flavor/.config "$dir"/.config
+	make -j1 -C "$srcdir"/Amlogic_s905-kernel-$_commit O="$dir" HOSTCC="${CC:-gcc}" \
+		silentoldconfig prepare modules_prepare scripts
+
+	# remove the stuff that points to real sources. we want 3rd party
+	# modules to believe this is the soruces
+	rm "$dir"/Makefile "$dir"/source
+
+	# copy the needed stuff from real sources
+	#
+	# this is taken from ubuntu kernel build script
+	# http://kernel.ubuntu.com/git/ubuntu/ubuntu-zesty.git/tree/debian/rules.d/3-binary-indep.mk
+	cd "$srcdir"/Amlogic_s905-kernel-$_commit
+	find .  -path './include/*' -prune \
+		-o -path './scripts/*' -prune -o -type f \
+		\( -name 'Makefile*' -o -name 'Kconfig*' -o -name 'Kbuild*' -o \
+		   -name '*.sh' -o -name '*.pl' -o -name '*.lds' \) \
+		-print | cpio -pdm "$dir"
+
+	cp -a scripts include "$dir"
+	find $(find arch -name include -type d -print) -type f \
+		| cpio -pdm "$dir"
+
+	install -Dm644 "$srcdir"/build-$_flavor/Module.symvers \
+		"$dir"/Module.symvers
+
+	mkdir -p "$subpkgdir"/lib/modules/${_abi_release}
+	ln -sf /usr/src/linux-headers-${_abi_release} \
+		"$subpkgdir"/lib/modules/${_abi_release}/build
+}
+
+sha512sums="ab652b7bbcd053e3763fddf964228aa5986e12d7c27ad3c2d6936abe86a3aaae343646eaa0111b8140dcd7cfd494544e554a86a2ecbf97edb9002901417d41f7  846b7fef181189f73ada11fd9ecb69691ed05fd3.tar.gz
+e1e48c1452b23076def6fb1e5281798b4c41bcfdebfaf888ce8753de2c1dc00e88827846fae08bf03641bdbc2d18d47e2380fc1139b25e1e2549516e770c7240  config-changes-s905d.aarch64"
