@@ -6,7 +6,7 @@ case $pkgver in
 *.*.*)	_kernver=${pkgver%.*};;
 *.*)	_kernver=${pkgver};;
 esac
-pkgrel=0
+pkgrel=1
 pkgdesc="Linux kernel for Amlogic s905d"
 url=https://github.com/150balbes/Amlogic_s905-kernel
 _commit=846b7fef181189f73ada11fd9ecb69691ed05fd3
@@ -15,6 +15,7 @@ _depends_dev="perl gmp-dev elfutils-dev bash"
 makedepends="$_depends_dev sed installkernel bc linux-headers linux-firmware openssl1.0-dev bison flex"
 options="!strip !check"
 source="$url/archive/${_commit}.tar.gz
+	https://github.com/150balbes/Build-Armbian/raw/af4f42b5a34f298382cc4e134f9774dcce0aafc4/config/kernel/linux-aml-s9xxx-default.config
 	config-changes-s905d.aarch64
 	"
 subpackages=""
@@ -69,11 +70,11 @@ _genconfig() {
 	local builddir="$srcdir"/build-$flavor
 	local defconfig=
 	case $flavor in
-		s905d) defconfig=config_20180719 ;;
+		s905d) defconfig=linux-aml-s9xxx-default.config ;;
 		*) die "Unknown flavor: $flavor" ;;
 	esac
 
-	cp "$srcdir"/Amlogic_s905-kernel-$_commit/$defconfig \
+	cp "$srcdir"/$defconfig \
 		"$builddir"/.config
 
 	while read line; do
@@ -221,4 +222,5 @@ _dev() {
 }
 
 sha512sums="ab652b7bbcd053e3763fddf964228aa5986e12d7c27ad3c2d6936abe86a3aaae343646eaa0111b8140dcd7cfd494544e554a86a2ecbf97edb9002901417d41f7  846b7fef181189f73ada11fd9ecb69691ed05fd3.tar.gz
+b3741a70cd7f8e20cc6cf2af8578ffcac0cf0243a26f4bf85a4ceabe5bfd63d6b0936e1d778f13a6e91d8c2aaca39ff9c6edb5f15be4cdcbb7f58222f769d986  linux-aml-s9xxx-default.config
 e1e48c1452b23076def6fb1e5281798b4c41bcfdebfaf888ce8753de2c1dc00e88827846fae08bf03641bdbc2d18d47e2380fc1139b25e1e2549516e770c7240  config-changes-s905d.aarch64"
