@@ -1,10 +1,5 @@
 # format is config=command(=string/value)
 # where command can be one of:
 # enable,disable,module,set-str,set-value
-CONFIG_VHOST_NET=module
-CONFIG_VHOST=module
-CONFIG_VHOST_CROSS_ENDIAN_LEGACY=enable
 CONFIG_DRM_UDL=module
 CONFIG_FB_UDL=module
-CONFIG_SYN_COOKIES=enable
-CONFIG_B43_SDIO=disable
