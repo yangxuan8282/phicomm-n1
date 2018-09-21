@@ -6,7 +6,7 @@ case $pkgver in
 *.*.*)	_kernver=${pkgver%.*};;
 *.*)	_kernver=${pkgver};;
 esac
-pkgrel=2
+pkgrel=3
 pkgdesc="Linux kernel for Amlogic s905d"
 url=https://github.com/150balbes/Amlogic_s905-kernel
 _commit=846b7fef181189f73ada11fd9ecb69691ed05fd3
@@ -223,4 +223,4 @@ _dev() {
 
 sha512sums="ab652b7bbcd053e3763fddf964228aa5986e12d7c27ad3c2d6936abe86a3aaae343646eaa0111b8140dcd7cfd494544e554a86a2ecbf97edb9002901417d41f7  846b7fef181189f73ada11fd9ecb69691ed05fd3.tar.gz
 5671f469f8db2983b2dc3537be9f21d94b680d02faadabfa0382f8b919ecb2226f3dac96934e426c30033673bedddea0cce7b734e1b7cc1f7e802af8cc78b2ab  config-changes-s905d.aarch64
-a6fcdce739ed8b8ef14cb4bbb1a3e9cdc60ae5527cee50b71fec4746066f87f66487ebdd93f6a432eae68eb15b4c6b4c3915884e7e9d7b3755a301434289533d  s905d.config"
+33b3e411d0526659b99333b45a49fb2e405d7df58b5cf44a7b83f00763a10ad01c1e6bab443b51ff9adc29b2ea3b4fcde75559a8c0985e9d39d78dc18c7da0d6  s905d.config"
