@@ -1,22 +1,22 @@
 # Maintainer: He Yangxuan <yangxuan8282@gmail.com>
 
 pkgname=linux-s905d
-pkgver=4.18.0
+pkgver=4.18.7
 case $pkgver in
 *.*.*)	_kernver=${pkgver%.*};;
 *.*)	_kernver=${pkgver};;
 esac
-pkgrel=3
+pkgrel=1
 pkgdesc="Linux kernel for Amlogic s905d"
 url=https://github.com/150balbes/Amlogic_s905-kernel
-_commit=846b7fef181189f73ada11fd9ecb69691ed05fd3
+_commit=0774525e710209a9e99136e5373b955f6c7defba
 depends="mkinitfs"
 _depends_dev="perl gmp-dev elfutils-dev bash"
 makedepends="$_depends_dev sed installkernel bc linux-headers linux-firmware openssl1.0-dev bison flex"
 options="!strip !check"
 source="$url/archive/${_commit}.tar.gz
 	config-changes-s905d.aarch64
-	s905d.config
+	s905d_defconfig
 	"
 subpackages=""
 arch="aarch64"
@@ -70,7 +70,7 @@ _genconfig() {
 	local builddir="$srcdir"/build-$flavor
 	local defconfig=
 	case $flavor in
-		s905d) defconfig=s905d.config ;;
+		s905d) defconfig=s905d_defconfig ;;
 		*) die "Unknown flavor: $flavor" ;;
 	esac
 
@@ -221,6 +221,6 @@ _dev() {
 		"$subpkgdir"/lib/modules/${_abi_release}/build
 }
 
-sha512sums="ab652b7bbcd053e3763fddf964228aa5986e12d7c27ad3c2d6936abe86a3aaae343646eaa0111b8140dcd7cfd494544e554a86a2ecbf97edb9002901417d41f7  846b7fef181189f73ada11fd9ecb69691ed05fd3.tar.gz
+sha512sums="6d7ae6e98eb42d824e0b33e402e4f71d6d76f47429e5df2f165ec1dbc2de26a07a4461d984bd18b8c1ea95b617240009a0ab1c974f2c49f4bae202a049abcac1  0774525e710209a9e99136e5373b955f6c7defba.tar.gz
 5671f469f8db2983b2dc3537be9f21d94b680d02faadabfa0382f8b919ecb2226f3dac96934e426c30033673bedddea0cce7b734e1b7cc1f7e802af8cc78b2ab  config-changes-s905d.aarch64
-33b3e411d0526659b99333b45a49fb2e405d7df58b5cf44a7b83f00763a10ad01c1e6bab443b51ff9adc29b2ea3b4fcde75559a8c0985e9d39d78dc18c7da0d6  s905d.config"
+025003623b972f044f96bdec00bd43d2941799240982e0cb771dae21d5fa401d08397d7aba98b1acdb5d36bcc5d5cd3d914a97db398b00ba02d14d9e1ecf5f25  s905d_defconfig"
