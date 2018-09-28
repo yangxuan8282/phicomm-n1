@@ -10,6 +10,8 @@ wttr.in in gotty:
 
 ![](https://github.com/yangxuan8282/phicomm-n1/raw/master/chrome_2018-09-27_09-16-18.png)
 
+more screenshot: https://github.com/yangxuan8282/phicomm-n1/wiki/cli
+
 ### Credits:
 
 https://baylibre.com/
