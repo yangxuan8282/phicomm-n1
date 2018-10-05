@@ -1,0 +1,21 @@
+version: '2'
+
+services:
+  gogs:
+    image: gogs/gogs-rpi
+    container_name: Gogs
+    networks:
+       - web
+    restart: "always"
+    labels:
+       - "traefik.backend=gogs"
+       - "traefik.frontend.rule=Host:git.armhf.tw"
+       - "traefik.port=3000" 
+    volumes:
+       - ./data/gogs:/data
+
+networks:
+  web:
+    external:
+      name: traefik_webgateway
+

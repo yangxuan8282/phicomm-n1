@@ -1,0 +1,22 @@
+version: "2"
+
+services:
+  nextcloud:
+    image: arm64v8/nextcloud:14.0-apache
+    restart: "always"
+    networks:
+      - web
+    labels:
+      - "traefik.backend=nextcloud"
+      - "traefik.port=80"
+      - "traefik.frontend.rule=Host:disk.armhf.tw"
+    volumes:
+      - ./apps:/var/www/html/apps
+      - ./config:/var/www/html/config
+      - ./data:/var/www/html/data
+      - ./themes:/var/www/html/themes
+
+networks:
+  web:
+    external:
+      name: traefik_webgateway

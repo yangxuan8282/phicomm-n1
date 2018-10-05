@@ -1,0 +1,19 @@
+version: "2"
+
+services:
+  kodexplorer:
+    image: yangxuan8282/kodexplorer:php-arm
+    restart: "always"
+    volumes:
+      - "./html:/var/www/html"
+    networks:
+      - web
+    labels:
+      - "traefik.backend=kodexplorer"
+      - "traefik.port=80"
+      - "traefik.frontend.rule=Host:file.armhf.tw"
+
+networks:
+  web:
+    external:
+      name: traefik_webgateway

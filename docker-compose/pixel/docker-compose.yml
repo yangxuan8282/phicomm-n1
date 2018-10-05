@@ -1,0 +1,17 @@
+version: "2"
+
+services:
+  pixel:
+    image: yangxuan8282/pixel-novnc
+    restart: unless-stopped
+    networks:
+      - web
+    labels:
+      - "traefik.backend=pixel"
+      - "traefik.port=6080"
+      - "traefik.frontend.rule=Host:vnc.armhf.tw"
+
+networks:
+  web:
+    external:
+      name: traefik_webgateway

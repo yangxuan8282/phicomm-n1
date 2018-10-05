@@ -1,0 +1,37 @@
+# defaultEntryPoints must be at the top because it should not be in any table below
+#defaultEntryPoints = ["http", "https"]
+defaultEntryPoints = ["http"]
+
+[web]
+# Port for the status page
+address = ":8080"
+
+# Entrypoints, http and https
+[entryPoints]
+
+# http should be redirected to https
+[entryPoints.http]
+address = ":80"
+#[entryPoints.http.redirect]
+#entryPoint = "https"
+
+# https is the default
+#[entryPoints.https]
+#address = ":443"
+#[entryPoints.https.tls]
+
+# Enable ACME (Let's Encrypt): automatic SSL
+#[acme]
+# caServer = "https://acme-staging.api.letsencrypt.org/directory"
+#email = "user@example.com"
+#storage = "acme.json" # or "traefik/acme/account" if using KV store
+#entryPoint = "https"
+#onDemand = false
+#OnHostRule = true
+
+
+[docker]
+endpoint = "unix:///var/run/docker.sock"
+domain = "armhf.tw"
+watch = true
+#exposedbydefault = false

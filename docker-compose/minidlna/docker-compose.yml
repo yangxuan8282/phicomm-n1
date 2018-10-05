@@ -1,0 +1,11 @@
+version: '2'
+
+services:
+  minidlna:
+    image: easypi/minidlna-arm
+    volumes:
+      - ./data:/opt
+    tmpfs:
+      - /var/run
+    network_mode: "host"
+    restart: always

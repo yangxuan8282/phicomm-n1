@@ -1,0 +1,21 @@
+version: '2'
+
+services:
+  proxy:
+    image: arm64v8/traefik
+    networks:
+      - webgateway
+    ports:
+      - "80:80"
+    restart: always
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "./traefik.toml:/traefik.toml"
+    labels:
+      - "traefik.backend=proxy"
+      - "traefik.frontend.rule=Host:traefik.armhf.tw"
+      - "traefik.port=8080"
+
+networks:
+  webgateway:
+    driver: bridge
