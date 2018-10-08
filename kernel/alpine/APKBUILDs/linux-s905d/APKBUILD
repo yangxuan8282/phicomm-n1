@@ -6,7 +6,7 @@ case $pkgver in
 *.*.*)	_kernver=${pkgver%.*};;
 *.*)	_kernver=${pkgver};;
 esac
-pkgrel=3
+pkgrel=4
 pkgdesc="Linux kernel for Amlogic s905d"
 url=https://github.com/150balbes/Amlogic_s905-kernel
 _commit=0774525e710209a9e99136e5373b955f6c7defba
@@ -17,6 +17,7 @@ options="!strip !check"
 source="$url/archive/${_commit}.tar.gz
 	config-changes-s905d.aarch64
 	s905d_defconfig
+	gxl-s905d-p230-rtl8211f-disable-eee.patch
 	"
 subpackages=""
 arch="aarch64"
@@ -42,7 +43,26 @@ HOSTCC="${CC:-gcc}"
 HOSTCC="${HOSTCC#${CROSS_COMPILE}}"
 
 prepare() {
+	local _patch_failed=
 	cd "$srcdir"/Amlogic_s905-kernel-$_commit
+
+	for i in $source; do
+		case $i in
+		*.patch)
+			msg "Applying $i..."
+			if ! patch -s -p1 -N -i "$srcdir"/${i##*/}; then
+				echo $i >>failed
+				_patch_failed=1
+			fi
+			;;
+		esac
+	done
+
+	if ! [ -z "$_patch_failed" ]; then
+		error "The following patches failed:"
+		cat failed
+		return 1
+	fi
 
 	# remove localversion from patch if any
 	rm -f localversion*
@@ -224,4 +244,5 @@ _dev() {
 
 sha512sums="6d7ae6e98eb42d824e0b33e402e4f71d6d76f47429e5df2f165ec1dbc2de26a07a4461d984bd18b8c1ea95b617240009a0ab1c974f2c49f4bae202a049abcac1  0774525e710209a9e99136e5373b955f6c7defba.tar.gz
 5671f469f8db2983b2dc3537be9f21d94b680d02faadabfa0382f8b919ecb2226f3dac96934e426c30033673bedddea0cce7b734e1b7cc1f7e802af8cc78b2ab  config-changes-s905d.aarch64
-2784f8c05c1c66f2bff73d0cdd415781e6529f269223607c18302803125092e7cb6c94083146deecc3226672f7f4754246cc62808f9384f697782ec55786883d  s905d_defconfig"
+2784f8c05c1c66f2bff73d0cdd415781e6529f269223607c18302803125092e7cb6c94083146deecc3226672f7f4754246cc62808f9384f697782ec55786883d  s905d_defconfig
+bb2abca9f1d984598193ef2996985de810ece0a7651fc8ed7ff9d0bca5f23995464b92397b8e615d827a3a03724ae449f8e842c3ec8e39395d02439410ab74ad  gxl-s905d-p230-rtl8211f-disable-eee.patch"
