@@ -6,7 +6,7 @@ case $pkgver in
 *.*.*)	_kernver=${pkgver%.*};;
 *.*)	_kernver=${pkgver};;
 esac
-pkgrel=4
+pkgrel=5
 pkgdesc="Linux kernel for Amlogic s905d"
 url=https://github.com/150balbes/Amlogic_s905-kernel
 _commit=0774525e710209a9e99136e5373b955f6c7defba
@@ -18,6 +18,7 @@ source="$url/archive/${_commit}.tar.gz
 	config-changes-s905d.aarch64
 	s905d_defconfig
 	gxl-s905d-p230-rtl8211f-disable-eee.patch
+	brcmfmac-Disable-power-management.patch
 	"
 subpackages=""
 arch="aarch64"
@@ -245,4 +246,5 @@ _dev() {
 sha512sums="6d7ae6e98eb42d824e0b33e402e4f71d6d76f47429e5df2f165ec1dbc2de26a07a4461d984bd18b8c1ea95b617240009a0ab1c974f2c49f4bae202a049abcac1  0774525e710209a9e99136e5373b955f6c7defba.tar.gz
 5671f469f8db2983b2dc3537be9f21d94b680d02faadabfa0382f8b919ecb2226f3dac96934e426c30033673bedddea0cce7b734e1b7cc1f7e802af8cc78b2ab  config-changes-s905d.aarch64
 2784f8c05c1c66f2bff73d0cdd415781e6529f269223607c18302803125092e7cb6c94083146deecc3226672f7f4754246cc62808f9384f697782ec55786883d  s905d_defconfig
-bb2abca9f1d984598193ef2996985de810ece0a7651fc8ed7ff9d0bca5f23995464b92397b8e615d827a3a03724ae449f8e842c3ec8e39395d02439410ab74ad  gxl-s905d-p230-rtl8211f-disable-eee.patch"
+bb2abca9f1d984598193ef2996985de810ece0a7651fc8ed7ff9d0bca5f23995464b92397b8e615d827a3a03724ae449f8e842c3ec8e39395d02439410ab74ad  gxl-s905d-p230-rtl8211f-disable-eee.patch
+007075ca40915f20c6c8f5e04825c3433a52621deb689a9a690a3fcc618ca9629bc089a1a2ad5141fc47a8aa0aabb302ecf75e81ef8cae466e978074156231ac  brcmfmac-Disable-power-management.patch"
