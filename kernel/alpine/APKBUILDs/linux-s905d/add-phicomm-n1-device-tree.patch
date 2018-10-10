@@ -12,10 +12,10 @@ index a97c0e2..ebd96da 100644
  dtb-$(CONFIG_ARCH_MESON) += meson-gxl-s905w-tx3-mini.dtb
 diff --git a/arch/arm64/boot/dts/amlogic/meson-gxl-s905d-phicomm-n1.dts b/arch/arm64/boot/dts/amlogic/meson-gxl-s905d-phicomm-n1.dts
 new file mode 100644
-index 0000000..79a9586
+index 0000000..eaf367f
 --- /dev/null
 +++ b/arch/arm64/boot/dts/amlogic/meson-gxl-s905d-phicomm-n1.dts
-@@ -0,0 +1,263 @@
+@@ -0,0 +1,260 @@
 +// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
 +/*
 + * Copyright (c) 2018 He Yangxuan
@@ -155,28 +155,25 @@ index 0000000..79a9586
 +	pinctrl-0 = <&eth_pins>;
 +	pinctrl-names = "default";
 +
-+	/* Select external PHY by default */
-+	phy-handle = <&external_phy>;
++	phy-handle = <&eth_phy0>;
++	phy-mode = "rgmii";
 +
 +	amlogic,tx-delay-ns = <2>;
 +
-+	/* External PHY reset is shared with internal PHY Led signals */
 +	snps,reset-gpio = <&gpio GPIOZ_14 0>;
 +	snps,reset-delays-us = <0 10000 1000000>;
 +	snps,reset-active-low;
 +
-+	/* External PHY is in RGMII */
-+	phy-mode = "rgmii";
-+};
++	mdio {
++		compatible = "snps,dwmac-mdio";
++		#address-cells = <1>;
++		#size-cells = <0>;
 +
-+&external_mdio {
-+	external_phy: ethernet-phy@0 {
-+		compatible = "ethernet-phy-id001c.c916", "ethernet-phy-ieee802.3-c22";
-+		reg = <0>;
-+		eee-broken-1000t;
-+		max-speed = <1000>;
-+		interrupt-parent = <&gpio_intc>;
-+		interrupts = <29 IRQ_TYPE_LEVEL_LOW>;
++		eth_phy0: ethernet-phy@0 {
++			/* Realtek RTL8211F (0x001cc916) */
++			reg = <0>;
++			eee-broken-1000t;
++		};
 +	};
 +};
 +
