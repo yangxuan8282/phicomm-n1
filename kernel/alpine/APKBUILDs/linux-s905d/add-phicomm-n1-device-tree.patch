@@ -1,0 +1,281 @@
+diff --git a/arch/arm64/boot/dts/amlogic/Makefile b/arch/arm64/boot/dts/amlogic/Makefile
+index a97c0e2..ebd96da 100644
+--- a/arch/arm64/boot/dts/amlogic/Makefile
++++ b/arch/arm64/boot/dts/amlogic/Makefile
+@@ -17,6 +17,7 @@ dtb-$(CONFIG_ARCH_MESON) += meson-gxl-s905x-nexbox-a95x.dtb
+ dtb-$(CONFIG_ARCH_MESON) += meson-gxl-s905x-p212.dtb
+ dtb-$(CONFIG_ARCH_MESON) += meson-gxl-s905d-p230.dtb
+ dtb-$(CONFIG_ARCH_MESON) += meson-gxl-s905d-p231.dtb
++dtb-$(CONFIG_ARCH_MESON) += meson-gxl-s905d-phicomm-n1.dtb
+ dtb-$(CONFIG_ARCH_MESON) += meson-gxl-s805x-p241.dtb
+ dtb-$(CONFIG_ARCH_MESON) += meson-gxl-s905w-p281.dtb
+ dtb-$(CONFIG_ARCH_MESON) += meson-gxl-s905w-tx3-mini.dtb
+diff --git a/arch/arm64/boot/dts/amlogic/meson-gxl-s905d-phicomm-n1.dts b/arch/arm64/boot/dts/amlogic/meson-gxl-s905d-phicomm-n1.dts
+new file mode 100644
+index 0000000..79a9586
+--- /dev/null
++++ b/arch/arm64/boot/dts/amlogic/meson-gxl-s905d-phicomm-n1.dts
+@@ -0,0 +1,263 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++/*
++ * Copyright (c) 2018 He Yangxuan
++ */
++
++/dts-v1/;
++
++#include "meson-gxl-s905d.dtsi"
++
++/ {
++	compatible = "phicomm,n1", "amlogic,s905d", "amlogic,meson-gxl";
++	model = "Phicomm N1";
++
++	aliases {
++		serial0 = &uart_AO;
++		ethernet0 = &ethmac;
++	};
++
++	chosen {
++		stdout-path = "serial0:115200n8";
++	};
++
++	memory@0 {
++		device_type = "memory";
++		reg = <0x0 0x0 0x0 0x80000000>;
++	};
++
++	vddio_boot: regulator-vddio_boot {
++		compatible = "regulator-fixed";
++		regulator-name = "VDDIO_BOOT";
++		regulator-min-microvolt = <1800000>;
++		regulator-max-microvolt = <1800000>;
++	};
++
++	vddao_3v3: regulator-vddao_3v3 {
++		compatible = "regulator-fixed";
++		regulator-name = "VDDAO_3V3";
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
++	};
++
++	vddio_ao18: regulator-vddio_ao18 {
++		compatible = "regulator-fixed";
++		regulator-name = "VDDIO_AO18";
++		regulator-min-microvolt = <1800000>;
++		regulator-max-microvolt = <1800000>;
++	};
++
++	vcc_3v3: regulator-vcc_3v3 {
++		compatible = "regulator-fixed";
++		regulator-name = "VCC_3V3";
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
++	};
++
++	emmc_pwrseq: emmc-pwrseq {
++		compatible = "mmc-pwrseq-emmc";
++		reset-gpios = <&gpio BOOT_9 GPIO_ACTIVE_LOW>;
++	};
++
++	wifi32k: wifi32k {
++		compatible = "pwm-clock";
++		#clock-cells = <0>;
++		clock-frequency = <32768>;
++		pwms = <&pwm_ef 0 30518 0>; /* PWM_E at 32.768KHz */
++	};
++
++	sdio_pwrseq: sdio-pwrseq {
++		compatible = "mmc-pwrseq-simple";
++		reset-gpios = <&gpio GPIOX_6 GPIO_ACTIVE_LOW>;
++		clocks = <&wifi32k>;
++		clock-names = "ext_clock";
++	};
++
++	hdmi-connector {
++		compatible = "hdmi-connector";
++		type = "a";
++
++		port {
++			hdmi_connector_in: endpoint {
++				remote-endpoint = <&hdmi_tx_tmds_out>;
++			};
++		};
++	};
++
++	sound {
++		compatible = "simple-audio-card";
++		simple-audio-card,name = "meson-gx-audio";
++
++		assigned-clocks = <&clkc CLKID_MPLL2>,
++				  <&clkc CLKID_MPLL0>,
++				  <&clkc CLKID_MPLL1>;
++		assigned-clock-parents = <0>, <0>, <0>;
++		assigned-clock-rates = <294912000>,
++				       <270950400>,
++				       <393216000>;
++
++		simple-audio-card,dai-link@0 {
++			/* HDMI Output */
++			format = "i2s";
++			mclk-fs = <256>;
++			bitclock-master = <&i2s_dai>;
++			frame-master = <&i2s_dai>;
++
++			plat {
++				sound-dai = <&aiu_i2s_dma>;
++			};
++
++			cpu {
++				sound-dai = <&i2s_dai>;
++			};
++
++			codec {
++				sound-dai = <&hdmi_tx>;
++			};
++		};
++	};
++};
++
++&cec_AO {
++	status = "okay";
++	pinctrl-0 = <&ao_cec_pins>;
++	pinctrl-names = "default";
++	hdmi-phandle = <&hdmi_tx>;
++};
++
++&audio {
++	status = "okay";
++};
++
++&aiu_i2s_dma {
++	status = "okay";
++};
++
++&ethmac {
++	status = "okay";
++	pinctrl-0 = <&eth_pins>;
++	pinctrl-names = "default";
++
++	/* Select external PHY by default */
++	phy-handle = <&external_phy>;
++
++	amlogic,tx-delay-ns = <2>;
++
++	/* External PHY reset is shared with internal PHY Led signals */
++	snps,reset-gpio = <&gpio GPIOZ_14 0>;
++	snps,reset-delays-us = <0 10000 1000000>;
++	snps,reset-active-low;
++
++	/* External PHY is in RGMII */
++	phy-mode = "rgmii";
++};
++
++&external_mdio {
++	external_phy: ethernet-phy@0 {
++		compatible = "ethernet-phy-id001c.c916", "ethernet-phy-ieee802.3-c22";
++		reg = <0>;
++		eee-broken-1000t;
++		max-speed = <1000>;
++		interrupt-parent = <&gpio_intc>;
++		interrupts = <29 IRQ_TYPE_LEVEL_LOW>;
++	};
++};
++
++&hdmi_tx {
++	status = "okay";
++	pinctrl-0 = <&hdmi_hpd_pins>, <&hdmi_i2c_pins>;
++	pinctrl-names = "default";
++};
++
++&hdmi_tx_tmds_port {
++	hdmi_tx_tmds_out: endpoint {
++		remote-endpoint = <&hdmi_connector_in>;
++	};
++};
++
++&i2s_dai {
++	status = "okay";
++};
++
++&ir {
++	status = "okay";
++	pinctrl-0 = <&remote_input_ao_pins>;
++	pinctrl-names = "default";
++};
++
++&pwm_ef {
++	status = "okay";
++	pinctrl-0 = <&pwm_e_pins>;
++	pinctrl-names = "default";
++	clocks = <&clkc CLKID_FCLK_DIV4>;
++	clock-names = "clkin0";
++};
++
++/* Wireless SDIO Module */
++&sd_emmc_a {
++	status = "okay";
++	pinctrl-0 = <&sdio_pins>;
++	pinctrl-1 = <&sdio_clk_gate_pins>;
++	pinctrl-names = "default", "clk-gate";
++	#address-cells = <1>;
++	#size-cells = <0>;
++
++	bus-width = <4>;
++	cap-sd-highspeed;
++	max-frequency = <100000000>;
++
++	non-removable;
++	disable-wp;
++
++	mmc-pwrseq = <&sdio_pwrseq>;
++
++	vmmc-supply = <&vddao_3v3>;
++	vqmmc-supply = <&vddio_boot>;
++
++	brcmf: wifi@1 {
++		reg = <1>;
++		compatible = "brcm,bcm4329-fmac";
++	};
++};
++
++/* eMMC */
++&sd_emmc_c {
++	status = "okay";
++	pinctrl-0 = <&emmc_pins>, <&emmc_ds_pins>;
++	pinctrl-1 = <&emmc_clk_gate_pins>;
++	pinctrl-names = "default", "clk-gate";
++
++	bus-width = <8>;
++	cap-mmc-highspeed;
++	max-frequency = <100000000>;
++	non-removable;
++	disable-wp;
++	mmc-ddr-1_8v;
++	mmc-hs200-1_8v;
++
++	mmc-pwrseq = <&emmc_pwrseq>;
++	vmmc-supply = <&vcc_3v3>;
++	vqmmc-supply = <&vddio_boot>;
++};
++
++/* This UART is brought out to the DB9 connector */
++&uart_AO {
++	status = "okay";
++	pinctrl-0 = <&uart_ao_a_pins>;
++	pinctrl-names = "default";
++};
++
++&usb0 {
++	status = "okay";
++};
++
++&cec_AO {
++	status = "okay";
++	pinctrl-0 = <&ao_cec_pins>;
++	pinctrl-names = "default";
++	hdmi-phandle = <&hdmi_tx>;
++};
++
++&saradc {
++	status = "okay";
++	vref-supply = <&vddio_ao18>;
++};
