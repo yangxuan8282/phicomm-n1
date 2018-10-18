@@ -1,0 +1,28 @@
+version: "2"
+
+services:
+  dnsmasq:
+    image: yangxuan8282/dnsmasq
+    #image: yangxuan8282/dnsmasq:amd64
+    restart: unless-stopped
+    privileged: true
+    network_mode: "host"
+    volumes:
+      - ./os/boot:/tftpboot
+      - ./dnsmasq.conf:/etc/dnsmasq.conf
+
+  nfs:
+    image: yangxuan8282/nfs-server-vers3
+    #image: yangxuan8282/nfs-server-vers3:amd64
+    restart: unless-stopped
+    privileged: true
+    #network_mode: "host"
+    ports:
+      - 111:111
+      - 111:111/udp
+      - 2049:2049
+      - 2049:2049/udp
+      - 32765-32768:32765-32768
+      - 32765-32768:32765-32768/udp
+    volumes:
+      - ./os:/nfsshare
