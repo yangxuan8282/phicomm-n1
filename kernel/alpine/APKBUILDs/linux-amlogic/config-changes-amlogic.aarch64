@@ -1,0 +1,6 @@
+# format is config=command(=string/value)
+# where command can be one of:
+# enable,disable,module,set-str,set-value
+CONFIG_DRM_UDL=module
+CONFIG_FB_UDL=module
+CONFIG_SYN_COOKIES=enable
