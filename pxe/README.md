@@ -20,21 +20,22 @@ or
 
 Client:
 
-prepare a usb disk, create as fat
+prepare a usb disk, format as fat
 
-copy the `aml_autoscript` and `s905_autoscript` in `usb` directory into it
+cd to `usb` dirctory, edit the `s905_autoscript.cmd` according to your network
 
-then install u-boot ( also in `usb` directory ) with `dd`:
-
-( replace TARGET_DEV with your usb devices )
+then generate autoscript with(need install uboot-tools):
 
 ```
-sudo dd if=usb/u-boot.bin of=TARGET_DEV bs=1 count=442 conv=fsync &&
-sudo dd if=usb/u-boot.bin of=TARGET_DEV bs=512 skip=1 seek=1 conv=fsync
+mkimage -C none -A arm -T script -d s905_autoscript.cmd s905_autoscript
 ```
 
-power on the box
+copy the `aml_autoscript` and `s905_autoscript` in `usb` directory into usb storage
 
-the u-boot in this repos is mainline 2018.07, use khadas-vim_defconfig
+power on the box, wait some minutes it should boot into the system
+
+some notes:
+
+we actually use u-boot on emmc, that should be u-boot 2015
 
 the nfs server Dockerfile is from [tangjiujun/docker-nfs-server](https://github.com/tangjiujun/docker-nfs-server)
