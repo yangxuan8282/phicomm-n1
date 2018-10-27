@@ -6,7 +6,7 @@ case $pkgver in
 *.*.*)	_kernver=${pkgver%.*};;
 *.*)	_kernver=${pkgver};;
 esac
-pkgrel=0
+pkgrel=1
 pkgdesc="Linux kernel for Amlogic"
 url=https://github.com/torvalds/linux
 _commit=e7d199e92956587695510d147c8de795f944cec9
@@ -52,7 +52,7 @@ source="$url/archive/${_commit}.tar.gz
 	off_error_text_offset.patch
 	"
 subpackages=""
-arch="aarch64"
+arch="armhf armv7 aarch64"
 license="GPL-2.0"
 _flavors=
 for _i in $source; do
@@ -69,6 +69,7 @@ done
 
 case "$CARCH" in
 	aarch64) _carch="arm64" ;;
+	arm*) _carch="arm" ;;
 esac
 
 HOSTCC="${CC:-gcc}"
@@ -273,7 +274,7 @@ _dev() {
 }
 
 sha512sums="b65dc14801b987b4d8ca786aa6571da12fd929ab147ed2f71f366b32313cd72d3047830e502b3fe51f9f1f3963d46b7f5b45ed937a4bdfee14dc216b32de2d3a  e7d199e92956587695510d147c8de795f944cec9.tar.gz
-a2fa33501fa08f4ecee22026730f66a6498198ab1fc944919d47586346091dcf5b24a34fab2bfdae7e7e0d86c8be2f4bb1ed1fa4833f07cf338c831fc3f1a8d0  config-changes-amlogic.aarch64
+12f0fd99ede213bcaf3f45cfa2033107be584760fe48071e945fcef54c1c2aa413f8c52db2983738f59d3510b7850231eff349fa862f8cfdc60b64e3eea2e1ba  config-changes-amlogic.aarch64
 4547c771ec2a6b65e4c4eb2ff51112c31262d53747293e7d5cd5ffd2202ea5144433cacab2070697e4677442c15873a31b3ce0ce5afcc292baeb44533e2292ff  defconfig
 94f944448156e435030d84d787d1489cdab4a6733b1fd27cd4ecd1284337d2b3e68bb3f74b3268a4cac01587e96019d4ad2a354c59d1422b6caae3f97849717f  0001-ARM64-dts-meson-gxbb-nanopi-k2-Add-HDMI-CEC-and-CVBS.patch
 997fee925f07735e635fdd2d2474500ca5a81a80a7817c079174e2508eec223264c97b79cfc057d6b4e428c4d9392405f79befd242dc9b21e020f544ffd84c9d  0002-drm-meson-Make-DMT-timings-parameters-and-pixel-cloc.patch
