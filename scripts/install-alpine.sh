@@ -1,7 +1,7 @@
 #!/bin/sh
 
-which rsync >/dev/null || pacman -S --noconfirm rsync
-which mkimage >/dev/null || pacman -S --noconfirm uboot-tools
+which mkimage >/dev/null || apk add uboot-tools
+which parted >/dev/null || apk add parted
 
 echo "Start script create MBR and filesystem"
 
@@ -57,7 +57,7 @@ echo "done."
 echo -n "Create new init config..."
 
 cat > "$DIR_INSTALL/uEnv.ini" <<'EOF'
-dtb_name=/dtbs/amlogic/meson-gxl-s905d-phicomm-n1.dtb
+dtb_name=/dtbs/meson-gxl-s905d-phicomm-n1.dtb
 bootargs=root=/dev/mmcblk1p2 rootflags=data=writeback rw console=ttyAML0,115200n8 console=tty0 no_console_suspend consoleblank=0 fsck.fix=yes fsck.repair=yes net.ifnames=0
 EOF
 
@@ -67,7 +67,7 @@ setenv kernel_addr "0x11000000"
 setenv initrd_addr "0x13000000"
 setenv dtb_mem_addr "0x1000000"
 setenv boot_start booti ${kernel_addr} ${initrd_addr} ${dtb_mem_addr}
-if fatload mmc 1 ${kernel_addr} Image; then if fatload mmc 1 ${initrd_addr} uInitrd; then if fatload mmc 1 ${env_addr} uEnv.ini; then env import -t ${env_addr} ${filesize}; fi; if fatload mmc 1 ${dtb_mem_addr} ${dtb_name}; then run boot_start;fi;fi;fi;
+if fatload mmc 1 ${kernel_addr} vmlinuz-amlogic; then if fatload mmc 1 ${initrd_addr} uInitrd; then if fatload mmc 1 ${env_addr} uEnv.ini; then env import -t ${env_addr} ${filesize}; fi; if fatload mmc 1 ${dtb_mem_addr} ${dtb_name}; then run boot_start;fi;fi;fi;
 EOF
 
 mkimage -C none -A arm -T script -d "$DIR_INSTALL/emmc_autoscript.cmd" "$DIR_INSTALL/emmc_autoscript"
@@ -92,18 +92,55 @@ echo "Copying ROOTFS."
 
 mount -o rw $PART_ROOT $DIR_INSTALL
 
-rsync -aAXv --exclude={"/dev/*","/proc/*","/sys/*","/tmp/*","/run/*","/mnt/*","/media/*","/boot/*","/ddbr","/lost+found"} / "$DIR_INSTALL"
+cd /
+echo "Copy BIN"
+tar -cf - bin | (cd $DIR_INSTALL; tar -xpf -)
+#echo "Copy BOOT"
+#mkdir -p $DIR_INSTALL/boot
+#tar -cf - boot | (cd $DIR_INSTALL; tar -xpf -)
+echo "Create DEV"
+mkdir -p $DIR_INSTALL/dev
+#tar -cf - dev | (cd $DIR_INSTALL; tar -xpf -)
+echo "Copy ETC"
+tar -cf - etc | (cd $DIR_INSTALL; tar -xpf -)
+echo "Copy HOME"
+tar -cf - home | (cd $DIR_INSTALL; tar -xpf -)
+echo "Copy LIB"
+tar -cf - lib | (cd $DIR_INSTALL; tar -xpf -)
+echo "Create MEDIA"
+mkdir -p $DIR_INSTALL/media
+#tar -cf - media | (cd $DIR_INSTALL; tar -xpf -)
+echo "Create MNT"
+mkdir -p $DIR_INSTALL/mnt
+#tar -cf - mnt | (cd $DIR_INSTALL; tar -xpf -)
+echo "Copy OPT"
+tar -cf - opt | (cd $DIR_INSTALL; tar -xpf -)
+echo "Create PROC"
+mkdir -p $DIR_INSTALL/proc
+echo "Copy ROOT"
+tar -cf - root | (cd $DIR_INSTALL; tar -xpf -)
+echo "Create RUN"
+mkdir -p $DIR_INSTALL/run
+echo "Copy SBIN"
+tar -cf - sbin | (cd $DIR_INSTALL; tar -xpf -)
+echo "Copy SRV"
+tar -cf - srv | (cd $DIR_INSTALL; tar -xpf -)
+echo "Create SYS"
+mkdir -p $DIR_INSTALL/sys
+echo "Create TMP"
+mkdir -p $DIR_INSTALL/tmp
+echo "Copy USR"
+tar -cf - usr | (cd $DIR_INSTALL; tar -xpf -)
+echo "Copy VAR"
+tar -cf - var | (cd $DIR_INSTALL; tar -xpf -)
 
 echo "Create new fstab"
 
 cat > "$DIR_INSTALL/etc/fstab" <<'EOF'
-# Static information about the filesystems.
-# See fstab(5) for details.
-
-# <file system> <dir> <type> <options> <dump> <pass>
-/dev/mmcblk1p1  /boot   vfat    defaults        0       0
+/dev/mmcblk1p1  /boot           vfat    defaults          0       2
 EOF
 
+cd /
 sync
 
 umount $DIR_INSTALL
