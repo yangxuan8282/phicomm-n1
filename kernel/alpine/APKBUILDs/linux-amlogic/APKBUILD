@@ -1,15 +1,15 @@
 # Maintainer: He Yangxuan <yangxuan8282@gmail.com>
 
 pkgname=linux-amlogic
-pkgver=4.18.14
+pkgver=4.18.18
 case $pkgver in
 *.*.*)	_kernver=${pkgver%.*};;
 *.*)	_kernver=${pkgver};;
 esac
-pkgrel=2
+pkgrel=0
 pkgdesc="Linux kernel for Amlogic"
 url=https://github.com/torvalds/linux
-_commit=e7d199e92956587695510d147c8de795f944cec9
+_commit=99661278215dc80915280cfab5c19dbdf5575424
 depends="mkinitfs"
 _depends_dev="perl gmp-dev elfutils-dev bash"
 makedepends="$_depends_dev sed installkernel bc linux-headers linux-firmware openssl-dev bison flex"
@@ -46,14 +46,14 @@ source="$url/archive/${_commit}.tar.gz
 	0027-ARM64-dts-meson-gx-add-vdec-entry.patch
 	0001-libretech-cc-disable-CVBS-connector.patch
 	0001-ARM64-dts-meson-add-vdec-entries.patch
+	0001-clk-meson-gxbb-set-fclk_div3-as-CLK_IS_CRITICAL.patch
 	add-phicomm-n1.patch
 	bt-btbcm.patch
 	brcmfmac-Disable-power-management.patch
 	offset.patch
-	off_error_text_offset.patch
 	"
 subpackages=""
-arch="armhf armv7 aarch64"
+arch="aarch64"
 license="GPL-2.0"
 _flavors=
 for _i in $source; do
@@ -274,7 +274,7 @@ _dev() {
 		"$subpkgdir"/lib/modules/${_abi_release}/build
 }
 
-sha512sums="b65dc14801b987b4d8ca786aa6571da12fd929ab147ed2f71f366b32313cd72d3047830e502b3fe51f9f1f3963d46b7f5b45ed937a4bdfee14dc216b32de2d3a  e7d199e92956587695510d147c8de795f944cec9.tar.gz
+sha512sums="d041f91e78495d316f081cdd459b1aefa36262244891770343dd9c0c5a4c68211ce4179fbe5803a7b218cbc1402d74232b70162eed875ff1133d332857166a7f  99661278215dc80915280cfab5c19dbdf5575424.tar.gz
 7186849193386fc06caab6db9ebf3d5b7efe2511f1c3836bb70d713340eb69b1f123f8372f15ee7f8dd61eeff5ce772b35db8557133ef64a2a1a5ca9e7cd30c9  config-changes-amlogic.aarch64
 2784f8c05c1c66f2bff73d0cdd415781e6529f269223607c18302803125092e7cb6c94083146deecc3226672f7f4754246cc62808f9384f697782ec55786883d  defconfig
 94f944448156e435030d84d787d1489cdab4a6733b1fd27cd4ecd1284337d2b3e68bb3f74b3268a4cac01587e96019d4ad2a354c59d1422b6caae3f97849717f  0001-ARM64-dts-meson-gxbb-nanopi-k2-Add-HDMI-CEC-and-CVBS.patch
@@ -306,8 +306,8 @@ f01e6fd7a319c75c85803e1deb1681772385640fd10ef4a24b164af6e708d0d29e8118bf2be12a82
 608bb5d25c94e9d8e0a1ea9d9fc2eb4436870d72e39f9446322dbdc62a5b7a3fd07d735613a425e1853cf9dd3e61fc860f4310858f9cfbea62a3ba69378b653c  0027-ARM64-dts-meson-gx-add-vdec-entry.patch
 0ab00106ab3a15ef884d0d08c4e947037007a4af7b03fc204346e9487f1f8841140dead1f6b8704b74f7fd955deaaa58cc7ce81c42a847bcdc5c13aac627f3e4  0001-libretech-cc-disable-CVBS-connector.patch
 7715e9c35072f60856d5ab6940874f053cd5e64f09ae97c79eef98bf0856f3a27643dae1154eec787c94a8c7c84b39c580324540db37d9bf2cf70b2bfa66595a  0001-ARM64-dts-meson-add-vdec-entries.patch
+ae3fb1aa096c9e37219013f4a3586817117bb329eb300a9cb3fd1a564e121a5b27d03ee0439b2774bbb26920532d25e1725dc74b9a6b7ce73b3e0f392243b8ce  0001-clk-meson-gxbb-set-fclk_div3-as-CLK_IS_CRITICAL.patch
 6262ecd89164edcfc58ef7d50c0b027a2263e6e78f51f033b611734a8e8db0436e1b132aee65546717dd5c79635ef38c9be11cffd7808491687494df9fdcb08e  add-phicomm-n1.patch
 dcc02a2e35e530490f18dd1f7e304aebd7c268ed8a46971d94e9da7dfd65b287002e6b921e46db5ce118177c9ab79fbe3640565cb2df19809b6eff514122fb43  bt-btbcm.patch
 007075ca40915f20c6c8f5e04825c3433a52621deb689a9a690a3fcc618ca9629bc089a1a2ad5141fc47a8aa0aabb302ecf75e81ef8cae466e978074156231ac  brcmfmac-Disable-power-management.patch
-cb2ec80ae38c4cc46ea2a4ca6d157498632f8154ef6a1dedb898c70593c812743a69a4c0d36a4e146a71c588e30e9f9b2feb415e00166850c2cf79797048b032  offset.patch
-e5d214788f9a28d79a9ef135fbed3b3c87982941788ca74d31d919534d1627c1265b268982f67de6c14b331d1a38938b4c2772f17b3db3bddd3983f919fe73ca  off_error_text_offset.patch"
+ea473a6c8fece95c4029f0d07f045bf1bf4b3f015ff8d57111c5f995222d194b418a73d78a0b5d7d62d95b3ca85ddb78fe9b6be105750985f3f68924b7ba6013  offset.patch"
